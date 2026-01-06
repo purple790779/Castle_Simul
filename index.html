@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>성주 경영 시뮬레이션 MVP</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="title">
+      <h1>성주 경영 시뮬레이션 (MVP)</h1>
+      <p class="subtitle">식량/노동/건설/세금 + 사건 + 치안/정통성의 최소 구현</p>
+    </div>
+    <div class="controls">
+      <button id="btnTick">하루 진행</button>
+      <button id="btnAuto">자동 진행: OFF</button>
+      <button id="btnSave">저장</button>
+      <button id="btnLoad">불러오기</button>
+      <button id="btnReset" class="danger">초기화</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card span-7">
+      <h2>현황</h2>
+      <div class="grid stats" id="stats"></div>
+      <div class="hint" id="hints"></div>
+    </section>
+
+    <section class="card span-5">
+      <h2>노동 배치</h2>
+      <p class="muted">총 노동력 내에서 직업을 배치하세요. 생산/치안/건설 효율이 바뀝니다.</p>
+      <div class="grid" id="jobs"></div>
+
+      <div class="row">
+        <label>세율(주간): <span id="taxLabel"></span></label>
+        <input id="taxRate" type="range" min="0" max="30" step="1" />
+      </div>
+      <p class="muted small">세율↑ → 금고↑ (주간) / 행복↓·정통성↓ 압박(일 단위).</p>
+    </section>
+
+    <section class="card span-7">
+      <h2>건설</h2>
+      <p class="muted">건설은 자원과 금을 소모합니다. 일부 건물은 매일 유지비가 듭니다.</p>
+      <div class="grid buildings" id="buildings"></div>
+    </section>
+
+    <section class="card span-5">
+      <h2>로그</h2>
+      <div id="log" class="log"></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-inner">
+      <h3 id="modalTitle"></h3>
+      <p id="modalBody"></p>
+      <div id="modalChoices" class="choices"></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span class="muted small">팁: 초반엔 농부/목수로 안정화 → 저장고/농장 확장 → 경비병/성벽으로 안전 확보.</span>
+  </footer>
+
+  <script src="./game.js"></script>
+</body>
+</html>
