@@ -33,6 +33,16 @@ body {
 
 .title h1 { margin: 0; font-size: 18px; }
 .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+.topbar-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.version {
+  font-size: 12px;
+  color: var(--muted);
+}
 
 .controls { display: flex; gap: 8px; flex-wrap: wrap; }
 button {
@@ -182,8 +192,50 @@ button.danger { border-color: rgba(255, 107, 107, 0.55); }
   border-radius: 18px;
   padding: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  max-height: 85vh;
+  overflow: hidden;
 }
 .modal-inner h3 { margin: 0 0 8px; font-size: 16px; }
 .modal-inner p { margin: 0 0 12px; color: var(--muted); line-height: 1.5; }
 .choices { display: flex; flex-wrap: wrap; gap: 8px; }
 .choices button { border-radius: 12px; }
+
+.modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+.help-content {
+  display: grid;
+  gap: 14px;
+  color: var(--text);
+}
+.help-title {
+  font-weight: 700;
+  color: var(--text);
+}
+.help-heading {
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.help-content ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.help-content li { margin-bottom: 6px; }
+.help-content li ul { margin-top: 6px; }
+.tutorial-content ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.55;
+}
