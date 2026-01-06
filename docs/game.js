@@ -303,6 +303,11 @@ function newGame() {
 
     // Log
     log: ['게임 시작! (하루 진행을 눌러 시작)'],
+
+    // Unrest & riot tracking
+    unrestDays: 0,
+    riotCooldownDays: 0,
+    riotCrimeBoostDays: 0,
   };
 }
 
@@ -340,6 +345,81 @@ function normalizeJobsToWorkforce() {
     over -= cut;
     if (over <= 0) break;
   }
+}
+
+function updateUnrest() {
+  const pressure =
+    (state.security < 40 ? 1 : 0) +
+    (state.happiness < 45 ? 1 : 0) +
+    (state.legitimacy < 40 ? 1 : 0);
+
+  if (pressure > 0) {
+    state.unrestDays = clamp(state.unrestDays + pressure, 0, 30);
+  } else {
+    state.unrestDays = clamp(state.unrestDays - 1, 0, 30);
+  }
+
+  if (state.riotCooldownDays > 0) {
+    state.riotCooldownDays = Math.max(0, state.riotCooldownDays - 1);
+  }
+  if (state.riotCrimeBoostDays > 0) {
+    state.riotCrimeBoostDays = Math.max(0, state.riotCrimeBoostDays - 1);
+  }
+}
+
+function maybeTriggerCrime() {
+  if (state.security >= 55 && state.unrestDays < 3) return;
+
+  const unrestFactor = state.unrestDays / 30;
+  const securityFactor = clamp((45 - state.security) / 80, 0, 0.5);
+  let chance = 0.05 + securityFactor + unrestFactor * 0.2;
+  if (state.riotCrimeBoostDays > 0) chance += 0.08;
+
+  if (rand() > chance) return;
+
+  const baseGoldLoss = randInt(8, 16) + Math.max(0, Math.floor((40 - state.security) * 0.3));
+  const goldLoss = Math.min(state.gold, baseGoldLoss);
+  const foodLoss = goldLoss <= 0 ? Math.min(state.food, randInt(6, 14)) : 0;
+  const happinessLoss = randInt(2, 4);
+  const securityLoss = randInt(1, 2);
+
+  state.gold = Math.max(0, state.gold - goldLoss);
+  state.food = Math.max(0, state.food - foodLoss);
+  state.happiness = clamp(state.happiness - happinessLoss, 0, 100);
+  state.security = clamp(state.security - securityLoss, 0, 100);
+
+  if (goldLoss > 0) {
+    log(`치안 불안으로 절도 발생: 금 -${goldLoss}, 행복 -${happinessLoss}, 치안 -${securityLoss}`);
+  } else if (foodLoss > 0) {
+    log(`치안 불안으로 약탈 발생: 식량 -${foodLoss}, 행복 -${happinessLoss}, 치안 -${securityLoss}`);
+  } else {
+    log(`치안 불안으로 소규모 소동: 행복 -${happinessLoss}, 치안 -${securityLoss}`);
+  }
+}
+
+function maybeTriggerRiot() {
+  if (state.riotCooldownDays > 0) return;
+  if (state.security >= 25 || state.unrestDays < 6) return;
+
+  const chance = clamp(0.08 + (25 - state.security) / 60 + (state.unrestDays - 5) / 20, 0.08, 0.45);
+  if (rand() > chance) return;
+
+  const goldLoss = Math.min(state.gold, randInt(18, 32));
+  const foodLoss = Math.min(state.food, randInt(15, 28));
+  const happinessLoss = randInt(6, 10);
+  const legitimacyLoss = randInt(3, 6);
+  const securityLoss = randInt(4, 7);
+
+  state.gold = Math.max(0, state.gold - goldLoss);
+  state.food = Math.max(0, state.food - foodLoss);
+  state.happiness = clamp(state.happiness - happinessLoss, 0, 100);
+  state.legitimacy = clamp(state.legitimacy - legitimacyLoss, 0, 100);
+  state.security = clamp(state.security - securityLoss, 0, 100);
+  state.unrestDays = clamp(state.unrestDays - 3, 0, 30);
+  state.riotCooldownDays = 12;
+  state.riotCrimeBoostDays = 6;
+
+  log(`폭동 발생! 금 -${goldLoss}, 식량 -${foodLoss}, 행복 -${happinessLoss}, 치안 -${securityLoss}, 정통성 -${legitimacyLoss}`);
 }
 
 /** ---------- Simulation ---------- */
@@ -413,7 +493,12 @@ function tickDay() {
   const secDelta = guardHelp - Math.max(0, happinessPenalty);
   state.security = clamp(state.security + secDelta, 0, 100);
 
-  // 8) Migration (if housing available + good conditions)
+  // 8) Unrest & crime/riot checks
+  updateUnrest();
+  maybeTriggerCrime();
+  maybeTriggerRiot();
+
+  // 9) Migration (if housing available + good conditions)
   if (state.population < state.housing) {
     const attract = (state.happiness + state.security + state.legitimacy) / 3;
     if (rand() < clamp((attract - 55) / 200, 0, 0.12)) {
@@ -425,14 +510,14 @@ function tickDay() {
     state.happiness = clamp(state.happiness - 0.8, 0, 100);
   }
 
-  // 9) Decay temp buffs/debuffs
+  // 10) Decay temp buffs/debuffs
   if (state.temp.farmBuffDays > 0) state.temp.farmBuffDays -= 1;
   if (state.temp.farmDebuffDays > 0) state.temp.farmDebuffDays -= 1;
 
-  // 10) Random event
+  // 11) Random event
   maybeTriggerEvent();
 
-  // 11) End of day
+  // 12) End of day
   state.day += 1;
   render();
 }
@@ -490,6 +575,7 @@ function build(buildingId) {
 /** ---------- UI Rendering ---------- */
 const elStats = document.getElementById('stats');
 const elHints = document.getElementById('hints');
+const elSecurityAlert = document.getElementById('securityAlert');
 const elJobs = document.getElementById('jobs');
 const elBuildings = document.getElementById('buildings');
 const elLog = document.getElementById('log');
@@ -574,6 +660,17 @@ function renderStats() {
   elStats.appendChild(kv('행복', `${Math.floor(state.happiness)}/100`, state.happiness < 45 ? '불만 증가: 치안 하락/이벤트 가중' : ''));
   elStats.appendChild(kv('치안', `${Math.floor(state.security)}/100`, state.security < 40 ? '약탈 위험 증가' : ''));
   elStats.appendChild(kv('정통성', `${Math.floor(state.legitimacy)}/100`, state.legitimacy < 40 ? '세금 저항/동요 위험' : ''));
+
+  if (state.security < 25) {
+    elSecurityAlert.textContent = '폭동 위험';
+    elSecurityAlert.className = 'security-alert danger';
+  } else if (state.security < 40) {
+    elSecurityAlert.textContent = '치안 불안: 범죄 증가';
+    elSecurityAlert.className = 'security-alert warning';
+  } else {
+    elSecurityAlert.textContent = '';
+    elSecurityAlert.className = 'security-alert muted';
+  }
 }
 
 function renderHints() {
@@ -755,6 +852,11 @@ function loadGame() {
     state.jobs ||= { farmer:0, woodcutter:0, builder:0, guard:0 };
     for (const j of JOBS) state.jobs[j.id] ||= 0;
     state.temp ||= { farmBuffDays:0, farmBuffMult:1, farmDebuffDays:0, farmDebuffMult:1 };
+    state.unrestDays = Number.isFinite(state.unrestDays) ? state.unrestDays : 0;
+    state.riotCooldownDays = Number.isFinite(state.riotCooldownDays) ? state.riotCooldownDays : 0;
+    state.riotCrimeBoostDays = Number.isFinite(state.riotCrimeBoostDays) ? state.riotCrimeBoostDays : 0;
+    state.riotCooldownDays = Math.max(0, state.riotCooldownDays);
+    state.riotCrimeBoostDays = Math.max(0, state.riotCrimeBoostDays);
     normalizeJobsToWorkforce();
     log('불러오기 완료.');
   } catch {
