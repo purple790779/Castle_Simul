@@ -265,6 +265,9 @@ function newGame() {
     happiness: 62,
     security: 50,
     legitimacy: 55,
+    unrestDays: 0,
+    riotCooldownDays: 0,
+    riotCrimeBoostDays: 0,
 
     // Resources
     food: 120,
@@ -344,6 +347,7 @@ function normalizeJobsToWorkforce() {
 
 /** ---------- Simulation ---------- */
 function tickDay() {
+  let riotTriggeredToday = false;
   // 1) Season progression (every 30 days)
   if (state.day > 1 && (state.day - 1) % 30 === 0) {
     state.seasonIndex = (state.seasonIndex + 1) % SEASONS.length;
@@ -413,7 +417,14 @@ function tickDay() {
   const secDelta = guardHelp - Math.max(0, happinessPenalty);
   state.security = clamp(state.security + secDelta, 0, 100);
 
-  // 8) Migration (if housing available + good conditions)
+  // 8) Crime + unrest tracking
+  updateUnrestDays();
+  maybeTriggerCrime();
+  if (maybeTriggerRiot()) {
+    riotTriggeredToday = true;
+  }
+
+  // 9) Migration (if housing available + good conditions)
   if (state.population < state.housing) {
     const attract = (state.happiness + state.security + state.legitimacy) / 3;
     if (rand() < clamp((attract - 55) / 200, 0, 0.12)) {
@@ -425,16 +436,113 @@ function tickDay() {
     state.happiness = clamp(state.happiness - 0.8, 0, 100);
   }
 
-  // 9) Decay temp buffs/debuffs
+  // 10) Decay temp buffs/debuffs
   if (state.temp.farmBuffDays > 0) state.temp.farmBuffDays -= 1;
   if (state.temp.farmDebuffDays > 0) state.temp.farmDebuffDays -= 1;
+  if (state.riotCrimeBoostDays > 0) state.riotCrimeBoostDays -= 1;
+  if (state.riotCooldownDays > 0 && !riotTriggeredToday) state.riotCooldownDays -= 1;
 
-  // 10) Random event
-  maybeTriggerEvent();
+  // 11) Random event (skip if riot modal opened)
+  if (!riotTriggeredToday) {
+    maybeTriggerEvent();
+  }
 
-  // 11) End of day
+  // 12) End of day
   state.day += 1;
   render();
+}
+
+function updateUnrestDays() {
+  if (state.security <= 25 || state.happiness <= 25) {
+    state.unrestDays += 1;
+  } else {
+    state.unrestDays = 0;
+  }
+}
+
+function maybeTriggerCrime() {
+  let baseChance = 0.02;
+  if (state.security < 25) baseChance = 0.32;
+  else if (state.security < 40) baseChance = 0.18;
+  else if (state.security < 60) baseChance = 0.08;
+
+  const boostMult = state.riotCrimeBoostDays > 0 ? 1.4 : 1.0;
+  const chance = clamp(baseChance * boostMult, 0.01, 0.65);
+  if (rand() > chance) return;
+
+  const baseGoldLoss = 8 + randInt(0, 12) + Math.max(0, Math.floor((60 - state.security) * 0.25));
+  const goldLoss = Math.floor(baseGoldLoss * (state.riotCrimeBoostDays > 0 ? 1.2 : 1.0));
+  state.gold -= goldLoss;
+
+  let happinessLoss = 0;
+  let legitimacyLoss = 0;
+  if (rand() < 0.65) happinessLoss = randInt(1, 4);
+  if (rand() < 0.55) legitimacyLoss = randInt(1, 3);
+  if (happinessLoss === 0 && legitimacyLoss === 0) {
+    happinessLoss = 2;
+  }
+
+  if (happinessLoss > 0) state.happiness = clamp(state.happiness - happinessLoss, 0, 100);
+  if (legitimacyLoss > 0) state.legitimacy = clamp(state.legitimacy - legitimacyLoss, 0, 100);
+
+  const losses = [`금 -${goldLoss}`];
+  if (happinessLoss > 0) losses.push(`행복 -${happinessLoss}`);
+  if (legitimacyLoss > 0) losses.push(`정통성 -${legitimacyLoss}`);
+  log(`치안 낮음으로 범죄 발생: ${losses.join(', ')}`);
+}
+
+function maybeTriggerRiot() {
+  if (state.riotCooldownDays > 0) return false;
+  const thresholdDays = 3;
+  if (state.unrestDays < thresholdDays) return false;
+
+  const danger = Math.min(state.security, state.happiness);
+  const chance = clamp(0.2 + (state.unrestDays - thresholdDays) * 0.08 + (25 - danger) / 55, 0.15, 0.7);
+  if (rand() > chance) return false;
+
+  state.riotCooldownDays = 7;
+  state.unrestDays = 0;
+  log('폭동 발생! 치안/민심이 크게 흔들립니다.');
+
+  const riotEvent = {
+    id: 'riot',
+    title: '도시 폭동',
+    body: '치안이 무너지고 군중이 폭동을 일으켰습니다. 대응을 선택하세요.',
+    choices: (s) => [
+      {
+        label: '강경 진압',
+        apply: () => {
+          const deaths = randInt(1, 3);
+          applyDeaths(deaths);
+          s.security = clamp(s.security + 8, 0, 100);
+          s.legitimacy = clamp(s.legitimacy - 6, 0, 100);
+          log(`강경 진압: 치안 +8, 정통성 -6, 사망 ${deaths}`);
+        },
+      },
+      {
+        label: '구휼/보상',
+        apply: () => {
+          const foodCost = Math.min(s.food, 30 + randInt(0, 18));
+          const goldCost = 20 + randInt(0, 15);
+          s.food -= foodCost;
+          s.gold -= goldCost;
+          s.happiness = clamp(s.happiness + 6, 0, 100);
+          s.legitimacy = clamp(s.legitimacy + 4, 0, 100);
+          log(`구휼/보상: 식량 -${foodCost}, 금 -${goldCost}, 행복 +6, 정통성 +4`);
+        },
+      },
+      {
+        label: '방치한다',
+        apply: () => {
+          s.riotCrimeBoostDays = 5;
+          log('방치: 당장 비용은 없지만 5일간 범죄/피해 확률 증가');
+        },
+      },
+    ],
+  };
+
+  openEventModal(riotEvent);
+  return true;
 }
 
 function maybeTriggerEvent() {
@@ -572,7 +680,10 @@ function renderStats() {
   elStats.appendChild(kv('금고', `${Math.floor(state.gold)}`, `주간 세금: Day ${state.day % 7 === 0 ? '오늘' : (7 - (state.day % 7)) + '일 후'}`));
 
   elStats.appendChild(kv('행복', `${Math.floor(state.happiness)}/100`, state.happiness < 45 ? '불만 증가: 치안 하락/이벤트 가중' : ''));
-  elStats.appendChild(kv('치안', `${Math.floor(state.security)}/100`, state.security < 40 ? '약탈 위험 증가' : ''));
+  let securityNote = '';
+  if (state.security < 25) securityNote = '폭동 위험';
+  else if (state.security < 40) securityNote = '치안 불안: 범죄 증가';
+  elStats.appendChild(kv('치안', `${Math.floor(state.security)}/100`, securityNote));
   elStats.appendChild(kv('정통성', `${Math.floor(state.legitimacy)}/100`, state.legitimacy < 40 ? '세금 저항/동요 위험' : ''));
 }
 
@@ -755,6 +866,9 @@ function loadGame() {
     state.jobs ||= { farmer:0, woodcutter:0, builder:0, guard:0 };
     for (const j of JOBS) state.jobs[j.id] ||= 0;
     state.temp ||= { farmBuffDays:0, farmBuffMult:1, farmDebuffDays:0, farmDebuffMult:1 };
+    state.unrestDays ??= 0;
+    state.riotCooldownDays ??= 0;
+    state.riotCrimeBoostDays ??= 0;
     normalizeJobsToWorkforce();
     log('불러오기 완료.');
   } catch {
