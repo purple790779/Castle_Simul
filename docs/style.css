@@ -71,6 +71,12 @@ button.danger { border-color: rgba(255, 107, 107, 0.55); }
 .card h2 { margin: 0 0 10px; font-size: 15px; }
 .muted { color: var(--muted); margin-top: 0; }
 .small { font-size: 12px; }
+.security-alert {
+  margin-top: 8px;
+  font-weight: 600;
+}
+.security-alert.warning { color: var(--warn); }
+.security-alert.danger { color: var(--bad); }
 
 .grid { display: grid; gap: 10px; }
 .stats { grid-template-columns: repeat(3, 1fr); }
