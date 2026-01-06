@@ -584,6 +584,7 @@ const btnTick = document.getElementById('btnTick');
 const btnAuto = document.getElementById('btnAuto');
 const btnSave = document.getElementById('btnSave');
 const btnLoad = document.getElementById('btnLoad');
+const btnHelp = document.getElementById('btnHelp');
 const btnReset = document.getElementById('btnReset');
 
 const taxRateInput = document.getElementById('taxRate');
@@ -595,6 +596,7 @@ btnTick.addEventListener('click', () => tickDay());
 btnAuto.addEventListener('click', () => toggleAuto());
 btnSave.addEventListener('click', () => saveGame());
 btnLoad.addEventListener('click', () => loadGame());
+btnHelp.addEventListener('click', () => toggleHelpModal());
 btnReset.addEventListener('click', () => resetGame());
 
 taxRateInput.addEventListener('input', () => {
@@ -800,6 +802,14 @@ const modalTitle = document.getElementById('modalTitle');
 const modalBody = document.getElementById('modalBody');
 const modalChoices = document.getElementById('modalChoices');
 
+const helpModal = document.getElementById('helpModal');
+const helpClose = document.getElementById('helpClose');
+
+const tutorialModal = document.getElementById('tutorialModal');
+const tutorialStart = document.getElementById('tutorialStart');
+
+const TUTORIAL_KEY = 'seenTutorial_v011';
+
 function openEventModal(ev) {
   // pause auto for decision clarity
   if (autoTimer) toggleAuto();
@@ -829,6 +839,47 @@ function closeModal() {
 
 modal.addEventListener('click', (e) => {
   if (e.target === modal) closeModal();
+});
+
+function openHelpModal() {
+  helpModal.classList.remove('hidden');
+}
+
+function closeHelpModal() {
+  helpModal.classList.add('hidden');
+}
+
+function toggleHelpModal() {
+  if (helpModal.classList.contains('hidden')) {
+    openHelpModal();
+  } else {
+    closeHelpModal();
+  }
+}
+
+helpClose.addEventListener('click', () => closeHelpModal());
+helpModal.addEventListener('click', (e) => {
+  if (e.target === helpModal) closeHelpModal();
+});
+
+function openTutorialModal() {
+  tutorialModal.classList.remove('hidden');
+  localStorage.setItem(TUTORIAL_KEY, 'true');
+}
+
+function closeTutorialModal() {
+  tutorialModal.classList.add('hidden');
+}
+
+function maybeShowTutorial() {
+  if (!localStorage.getItem(TUTORIAL_KEY)) {
+    openTutorialModal();
+  }
+}
+
+tutorialStart.addEventListener('click', () => closeTutorialModal());
+tutorialModal.addEventListener('click', (e) => {
+  if (e.target === tutorialModal) closeTutorialModal();
 });
 
 /** ---------- Save/Load ---------- */
@@ -869,7 +920,10 @@ function resetGame() {
   if (autoTimer) toggleAuto();
   state = newGame();
   render();
+  localStorage.removeItem(TUTORIAL_KEY);
+  openTutorialModal();
 }
 
 /** ---------- Init ---------- */
 render();
+maybeShowTutorial();
