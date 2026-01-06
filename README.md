@@ -1,1 +1,2 @@
-# castle town webgame
+README.md → docs/README.md
+
