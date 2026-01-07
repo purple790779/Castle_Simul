@@ -15,12 +15,12 @@
     <div class="topbar-right">
       <div class="version">v0.1.1</div>
       <div class="controls">
-        <button id="btnTick">하루 진행</button>
-        <button id="btnAuto">자동 진행: OFF</button>
-        <button id="btnSave">저장</button>
-        <button id="btnLoad">불러오기</button>
-        <button id="btnHelp">도움말 ?</button>
-        <button id="btnReset" class="danger">초기화</button>
+        <button id="btnTick" class="btn btn-primary">하루 진행</button>
+        <button id="btnAuto" class="btn btn-secondary">자동 진행: OFF</button>
+        <button id="btnSave" class="btn btn-secondary">저장</button>
+        <button id="btnLoad" class="btn btn-secondary">불러오기</button>
+        <button id="btnHelp" class="btn btn-secondary">도움말 ?</button>
+        <button id="btnReset" class="btn btn-secondary danger">초기화</button>
       </div>
     </div>
   </header>
@@ -66,7 +66,7 @@
     </div>
   </div>
 
-  <div id="helpModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div id="helpModal" class="modal modal--parchment hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="modal-inner">
       <h3 id="helpTitle">도움말 / How to Play</h3>
       <div class="modal-body help-content">
@@ -149,12 +149,12 @@
         </div>
       </div>
       <div class="modal-actions">
-        <button id="helpClose">닫기</button>
+        <button id="helpClose" class="btn btn-secondary btn-large">닫기</button>
       </div>
     </div>
   </div>
 
-  <div id="tutorialModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
+  <div id="tutorialModal" class="modal modal--parchment hidden" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
     <div class="modal-inner">
       <h3 id="tutorialTitle">처음 오셨나요?</h3>
       <div class="modal-body tutorial-content">
@@ -167,7 +167,7 @@
         </ul>
       </div>
       <div class="modal-actions">
-        <button id="tutorialStart">시작하기</button>
+        <button id="tutorialStart" class="btn btn-primary btn-large">시작하기</button>
       </div>
     </div>
   </div>
