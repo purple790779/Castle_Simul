@@ -128,12 +128,11 @@ function updateOrientationOverlay() {
     return;
   }
 
-  const shouldShow = isLandscape && !orientationOverlayDismissed;
-
   if (!isLandscape) {
     orientationOverlayDismissed = false;
   }
 
+  const shouldShow = isLandscape && !orientationOverlayDismissed;
   overlay.classList.toggle('hidden', !shouldShow);
 }
 
