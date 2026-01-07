@@ -105,6 +105,9 @@ savedData = {
   },
 };
 let metaUpgrades = storage ? storage.getMetaUpgrades() : {};
+let pickupMult = 1;
+let startChoicesBonus = 0;
+let startLevelBonus = 0;
 let playerState = { ...BASE_PLAYER };
 let gameInfo = {
   maxHp: BASE_PLAYER.maxHp,
@@ -190,10 +193,10 @@ function getUpgradeCost(def, level) {
   return Math.round(def.baseCost * def.costScale ** level);
 }
 
-function renderUpgradeModal() {
-  const fragmentsEl = document.getElementById('upgrade-fragments');
-  const coresEl = document.getElementById('upgrade-cores');
-  const listEl = document.getElementById('upgrade-list');
+function renderMetaUpgradeList() {
+  const fragmentsEl = document.getElementById('meta-upgrade-fragments');
+  const coresEl = document.getElementById('meta-upgrade-cores');
+  const listEl = document.getElementById('meta-upgrade-list');
   if (!listEl) return;
 
   metaUpgrades = storage ? storage.getMetaUpgrades() : metaUpgrades;
@@ -226,7 +229,7 @@ function renderUpgradeModal() {
     button.textContent = atMax ? 'MAX' : '구매';
     button.disabled = atMax || !canAfford;
     button.addEventListener('click', () => {
-      tryBuyUpgrade(def.key);
+      tryBuyMetaUpgrade(def.key);
     });
 
     const reason = document.createElement('div');
@@ -243,20 +246,20 @@ function renderUpgradeModal() {
   });
 }
 
-function openUpgradeModal() {
-  const overlay = document.getElementById('upgrade-overlay');
+function openMetaUpgradeModal() {
+  const overlay = document.getElementById('meta-upgrade-overlay');
   if (!overlay) return;
   overlay.classList.remove('hidden');
-  renderUpgradeModal();
+  renderMetaUpgradeList();
 }
 
-function closeUpgradeModal() {
-  const overlay = document.getElementById('upgrade-overlay');
+function closeMetaUpgradeModal() {
+  const overlay = document.getElementById('meta-upgrade-overlay');
   if (!overlay) return;
   overlay.classList.add('hidden');
 }
 
-function tryBuyUpgrade(key) {
+function tryBuyMetaUpgrade(key) {
   const def = UPGRADE_DEFS.find((item) => item.key === key);
   if (!def) return;
 
@@ -278,16 +281,15 @@ function tryBuyUpgrade(key) {
 
   if (storage) {
     storage.setMetaUpgrades(metaUpgrades);
-    persistSaveData();
+    saveSavedData(savedData);
   }
 
-  updateLobbyResources();
-  renderUpgradeModal();
+  updateLobbyUI();
+  renderMetaUpgradeList();
 }
 
 function addResources(kind, amount) {
-  const multiplier = 1 + 0.02 * (metaUpgrades.pickup ?? 0);
-  const finalAmount = Math.round(amount * multiplier);
+  const finalAmount = Math.round(amount * pickupMult);
   savedData = {
     ...savedData,
     resources: {
@@ -308,6 +310,7 @@ function resetGameData() {
     rerolls: 0,
     level: 1,
   };
+  applyMetaUpgrades();
 }
 
 function applyMetaUpgrades() {
@@ -321,18 +324,22 @@ function applyMetaUpgrades() {
   playerState = {
     ...playerState,
     damage: playerState.damage * atkMult,
-    fireRate: playerState.fireRate * fireRateMult,
+    fireRate: playerState.fireRate * (1 / fireRateMult),
     range: playerState.range * rangeMult,
     maxHp: playerState.maxHp * maxHpMult,
   };
+
+  startLevelBonus = metaUpgrades.startLevel ?? 0;
+  startChoicesBonus = metaUpgrades.startChoices ?? 0;
+  pickupMult = 1 + 0.02 * (metaUpgrades.pickup ?? 0);
 
   gameInfo = {
     ...gameInfo,
     maxHp: playerState.maxHp,
     hp: playerState.maxHp,
-    startChoices: Math.min(5, gameInfo.startChoices + (metaUpgrades.startChoices ?? 0)),
+    startChoices: Math.min(5, 3 + startChoicesBonus),
     rerolls: metaUpgrades.rerolls ?? 0,
-    level: 1 + (metaUpgrades.startLevel ?? 0),
+    level: 1 + startLevelBonus,
   };
 }
 
@@ -340,7 +347,7 @@ function buildStartChoices() {
   const list = document.getElementById('selection-list');
   if (!list) return;
   list.innerHTML = '';
-  const choices = Math.max(3, gameInfo.startChoices);
+  const choices = Math.min(5, 3 + startChoicesBonus);
   for (let i = 0; i < choices; i += 1) {
     const card = document.createElement('div');
     const pick = startChoiceTemplates[(Math.random() * startChoiceTemplates.length) | 0];
@@ -373,7 +380,6 @@ function closeSelectionOverlay() {
 
 function startRun() {
   resetGameData();
-  applyMetaUpgrades();
   updateRunStats();
   openSelectionOverlay();
 }
@@ -454,19 +460,19 @@ function init() {
     });
   }
 
-  const upgradeOpen = document.getElementById('upgrade-open');
+  const upgradeOpen = document.getElementById('btn-upgr');
   if (upgradeOpen) {
-    upgradeOpen.addEventListener('click', openUpgradeModal);
+    upgradeOpen.addEventListener('click', openMetaUpgradeModal);
   }
 
-  const upgradeClose = document.getElementById('upgrade-close');
-  if (upgradeClose) {
-    upgradeClose.addEventListener('click', closeUpgradeModal);
+  const metaUpgradeClose = document.getElementById('meta-upgrade-close');
+  if (metaUpgradeClose) {
+    metaUpgradeClose.addEventListener('click', closeMetaUpgradeModal);
   }
 
-  const upgradeBackdrop = document.getElementById('upgrade-backdrop');
-  if (upgradeBackdrop) {
-    upgradeBackdrop.addEventListener('click', closeUpgradeModal);
+  const metaUpgradeBackdrop = document.getElementById('meta-upgrade-backdrop');
+  if (metaUpgradeBackdrop) {
+    metaUpgradeBackdrop.addEventListener('click', closeMetaUpgradeModal);
   }
 
   const startBtn = document.getElementById('start-run');

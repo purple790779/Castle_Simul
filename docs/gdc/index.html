@@ -212,6 +212,14 @@
       gap: 12px;
     }
 
+    #meta-upgrade-overlay .modal-card {
+      max-height: 80vh;
+    }
+
+    #meta-upgrade-overlay .modal-scroll {
+      max-height: 55vh;
+    }
+
     .upgrade-item {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -324,7 +332,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
-    .rotate-continue-btn {
+    #rotate-overlay .rotate-continue-btn {
       margin-top: 18px;
       min-height: 44px;
       padding: 12px 18px;
@@ -338,7 +346,7 @@
       cursor: pointer;
     }
 
-    .rotate-continue-btn:active {
+    #rotate-overlay .rotate-continue-btn:active {
       transform: scale(0.98);
       filter: brightness(1.08);
     }
@@ -347,7 +355,7 @@
 <body>
   <header class="topbar">
     <a class="hub" href="../">HUB</a>
-    <div class="version" id="version">v37.1.6</div>
+    <div class="version" id="version">v37.2.0</div>
   </header>
 
   <main class="content">
@@ -361,7 +369,7 @@
       </div>
 
       <div class="lobby-actions">
-        <button class="action-btn secondary" id="upgrade-open" type="button">UPGR</button>
+        <button class="action-btn secondary" id="btn-upgr" type="button">UPGR</button>
         <button class="action-btn" id="start-run" type="button">START</button>
       </div>
 
@@ -396,6 +404,23 @@
     </div>
   </div>
 
+  <div id="meta-upgrade-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="meta-upgrade-title">
+    <div id="meta-upgrade-backdrop" class="modal-backdrop" aria-hidden="true"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="meta-upgrade-title">META UPGRADES</div>
+        <button id="meta-upgrade-close" class="close-btn" type="button" aria-label="Close meta upgrades">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="resource-bar">
+          <div class="resource-pill">Fragments: <span id="meta-upgrade-fragments">0</span></div>
+          <div class="resource-pill">Cores: <span id="meta-upgrade-cores">0</span></div>
+        </div>
+        <div class="modal-scroll" id="meta-upgrade-list"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="selection-overlay" class="modal-overlay hidden selection-overlay" role="dialog" aria-modal="true" aria-labelledby="selection-title">
     <div class="modal-backdrop" id="selection-backdrop" aria-hidden="true"></div>
     <div class="modal-card">
@@ -413,7 +438,7 @@
   <div id="rotate-overlay" class="rotate-overlay hidden" aria-live="polite">
     <div class="rotate-card">
       <h2>세로 모드 권장</h2>
-      <p>휴대폰에서 더 편하게 즐기려면 화면을 세로로 돌려주세요.</p>
+      <p>게임화면에 맞게<br />세로로 창을 조절해 주세요</p>
       <button id="rotate-continue" class="rotate-continue-btn" type="button" aria-label="Continue in landscape">
         계속 진행
       </button>
