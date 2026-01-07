@@ -1,2 +1,2 @@
-const VERSION = 'v37.2.0';
+const VERSION = 'v37.1.4';
 window.GDC_VERSION = VERSION;
