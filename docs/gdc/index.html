@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GDC ProtoTypeGame</title>
+  <style>
+    body {
+      font-family: "Noto Sans KR", sans-serif;
+      margin: 0;
+      background: #0e0f12;
+      color: #f2f2f2;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: #151821;
+      border-bottom: 1px solid #2b2f3a;
+    }
+
+    .hub {
+      color: #0e0f12;
+      background: #f2b94b;
+      padding: 8px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .version {
+      font-weight: 600;
+    }
+
+    .content {
+      padding: 24px;
+    }
+
+    .rotate-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 1000;
+    }
+
+    .rotate-overlay.hidden {
+      display: none;
+    }
+
+    .rotate-card {
+      background: #1b1f2b;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 320px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="hub" href="../">HUB</a>
+    <div class="version" id="version">v37.1.4</div>
+  </header>
+
+  <main class="content">
+    <h1>ProtoTypeGame: GDC</h1>
+    <p>모바일 세로 환경에 최적화된 프로토타입입니다.</p>
+  </main>
+
+  <div id="rotate-overlay" class="rotate-overlay hidden" aria-live="polite">
+    <div class="rotate-card">
+      <h2>세로 모드 권장</h2>
+      <p>휴대폰에서 더 편하게 즐기려면 화면을 세로로 돌려주세요.</p>
+    </div>
+  </div>
+
+  <script src="./src/version.js"></script>
+  <script src="./src/main.js"></script>
+</body>
+</html>
