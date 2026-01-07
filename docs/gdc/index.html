@@ -38,6 +38,236 @@
       padding: 24px;
     }
 
+    .lobby {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .resource-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #1a1f2d;
+      border-radius: 14px;
+      border: 1px solid #2b2f3a;
+    }
+
+    .resource-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .lobby-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .action-btn {
+      min-height: 48px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      border: none;
+      background: #4b7bff;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+
+    .action-btn.secondary {
+      background: #2c3346;
+      border: 1px solid #3d455b;
+    }
+
+    .action-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .run-stats {
+      padding: 16px;
+      border-radius: 14px;
+      background: #121623;
+      border: 1px solid #2b2f3a;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.hidden {
+      display: none;
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(7, 9, 14, 0.75);
+    }
+
+    .modal-card {
+      position: relative;
+      width: min(560px, 100%);
+      max-height: 85vh;
+      background: #141824;
+      border-radius: 18px;
+      padding: 20px 18px calc(18px + env(safe-area-inset-bottom));
+      border: 1px solid #2b2f3a;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 1;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      letter-spacing: 0.14em;
+      font-weight: 800;
+    }
+
+    .close-btn {
+      min-width: 44px;
+      min-height: 44px;
+      border-radius: 12px;
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .modal-body {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-scroll {
+      overflow-y: auto;
+      padding-right: 6px;
+      max-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .upgrade-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 14px;
+      background: #1a2133;
+      border: 1px solid #2b2f3a;
+    }
+
+    .upgrade-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.92rem;
+    }
+
+    .upgrade-name {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .upgrade-cost {
+      color: #b0bbd8;
+      font-size: 0.85rem;
+    }
+
+    .upgrade-action {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .upgrade-btn {
+      min-height: 44px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: none;
+      background: #38d99f;
+      color: #091018;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .upgrade-btn:disabled {
+      background: #3a4050;
+      color: #c4c8d6;
+      cursor: not-allowed;
+    }
+
+    .upgrade-reason {
+      font-size: 0.8rem;
+      color: #ff7a7a;
+    }
+
+    .selection-overlay .modal-card {
+      max-height: 80vh;
+    }
+
+    .selection-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .selection-card {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid #2b2f3a;
+    }
+
+    .reroll-btn {
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid #3d455b;
+      background: #2c3346;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .reroll-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .rotate-overlay {
       position: fixed;
       inset: 0;
@@ -84,13 +314,60 @@
 <body>
   <header class="topbar">
     <a class="hub" href="../">HUB</a>
-    <div class="version" id="version">v37.1.5</div>
+    <div class="version" id="version">v37.2.0</div>
   </header>
 
   <main class="content">
     <h1>ProtoTypeGame: GDC</h1>
     <p>모바일 세로 환경에 최적화된 프로토타입입니다.</p>
+
+    <section class="lobby">
+      <div class="resource-bar" aria-live="polite">
+        <div class="resource-pill">Fragments: <span id="lobby-fragments">0</span></div>
+        <div class="resource-pill">Cores: <span id="lobby-cores">0</span></div>
+      </div>
+
+      <div class="lobby-actions">
+        <button class="action-btn secondary" id="upgrade-open" type="button">UPGR</button>
+        <button class="action-btn" id="start-run" type="button">START</button>
+      </div>
+
+      <div class="run-stats" id="run-stats">
+        런 준비 완료. 업그레이드 적용 상태를 여기에 표시합니다.
+      </div>
+    </section>
   </main>
+
+  <div id="upgrade-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
+    <div id="upgrade-backdrop" class="modal-backdrop" aria-hidden="true"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="upgrade-title">UPGRADES</div>
+        <button id="upgrade-close" class="close-btn" type="button" aria-label="Close upgrades">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="resource-bar">
+          <div class="resource-pill">Fragments: <span id="upgrade-fragments">0</span></div>
+          <div class="resource-pill">Cores: <span id="upgrade-cores">0</span></div>
+        </div>
+        <div class="modal-scroll" id="upgrade-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="selection-overlay" class="modal-overlay hidden selection-overlay" role="dialog" aria-modal="true" aria-labelledby="selection-title">
+    <div class="modal-backdrop" id="selection-backdrop" aria-hidden="true"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="selection-title">START CHOICES</div>
+        <button id="selection-close" class="close-btn" type="button" aria-label="Close selection">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="selection-list" id="selection-list"></div>
+        <button class="reroll-btn" id="selection-reroll" type="button">REROLL (0)</button>
+      </div>
+    </div>
+  </div>
 
   <div id="rotate-overlay" class="rotate-overlay hidden" aria-live="polite">
     <div class="rotate-card">
@@ -103,6 +380,7 @@
   </div>
 
   <script src="./src/version.js"></script>
+  <script src="./src/storage.js"></script>
   <script src="./src/main.js"></script>
 </body>
 </html>
