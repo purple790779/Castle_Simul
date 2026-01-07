@@ -763,6 +763,7 @@ function renderBuildings() {
     actions.className = 'actions';
 
     const btn = document.createElement('button');
+    btn.className = 'btn btn-secondary';
     btn.textContent = '건설';
     btn.addEventListener('click', () => build(b.id));
     if (!canPay(b.cost)) btn.disabled = true;
@@ -821,6 +822,7 @@ function openEventModal(ev) {
   const choices = ev.choices(state);
   for (const c of choices) {
     const b = document.createElement('button');
+    b.className = 'btn btn-primary';
     b.textContent = c.label;
     b.addEventListener('click', () => {
       closeModal();
