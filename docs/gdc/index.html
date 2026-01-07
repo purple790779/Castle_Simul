@@ -60,12 +60,31 @@
       max-width: 320px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
+
+    .rotate-continue-btn {
+      margin-top: 18px;
+      min-height: 44px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(0, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.35);
+      color: rgba(200, 255, 255, 0.92);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+    }
+
+    .rotate-continue-btn:active {
+      transform: scale(0.98);
+      filter: brightness(1.08);
+    }
   </style>
 </head>
 <body>
   <header class="topbar">
     <a class="hub" href="../">HUB</a>
-    <div class="version" id="version">v37.1.4</div>
+    <div class="version" id="version">v37.1.5</div>
   </header>
 
   <main class="content">
@@ -77,6 +96,9 @@
     <div class="rotate-card">
       <h2>세로 모드 권장</h2>
       <p>휴대폰에서 더 편하게 즐기려면 화면을 세로로 돌려주세요.</p>
+      <button id="rotate-continue" class="rotate-continue-btn" type="button" aria-label="Continue in landscape">
+        계속 진행
+      </button>
     </div>
   </div>
 

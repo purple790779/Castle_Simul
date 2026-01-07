@@ -1,6 +1,7 @@
 'use strict';
 
 const STORAGE_PREFIX = 'gdc';
+let orientationOverlayDismissed = false;
 
 function updateOrientationOverlay() {
   const overlay = document.getElementById('rotate-overlay');
@@ -8,7 +9,18 @@ function updateOrientationOverlay() {
 
   const isLandscape = window.innerWidth > window.innerHeight;
   const shortSide = Math.min(window.innerWidth, window.innerHeight);
-  const shouldShow = isLandscape && shortSide < 600;
+
+  if (shortSide >= 600) {
+    orientationOverlayDismissed = false;
+    overlay.classList.add('hidden');
+    return;
+  }
+
+  const shouldShow = isLandscape && !orientationOverlayDismissed;
+
+  if (!isLandscape) {
+    orientationOverlayDismissed = false;
+  }
 
   overlay.classList.toggle('hidden', !shouldShow);
 }
@@ -21,6 +33,15 @@ function init() {
   const versionEl = document.getElementById('version');
   if (versionEl && window.GDC_VERSION) {
     versionEl.textContent = window.GDC_VERSION;
+  }
+
+  const rotateContinueBtn = document.getElementById('rotate-continue');
+  if (rotateContinueBtn) {
+    rotateContinueBtn.addEventListener('click', () => {
+      orientationOverlayDismissed = true;
+      const overlay = document.getElementById('rotate-overlay');
+      if (overlay) overlay.classList.add('hidden');
+    });
   }
 
   resize();
