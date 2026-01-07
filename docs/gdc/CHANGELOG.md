@@ -1,5 +1,11 @@
 # Changelog
 
+## v37.1.6 - 2026-01-07
+### Fixed
+- DEV 패널(GOD MODE/TEST STAGE) 버튼 클릭이 동작하지 않던 문제 수정
+### Changed
+- GOD MODE: 전체 스테이지 해금 + 자원 100000 지급을 명시적으로 적용
+
 ## v37.1.4 - 2026-01-07
 ### Fixed
 - Desktop/Notebook에서 세로모드 권장 오버레이가 입력을 막던 문제 수정(모바일에서만 표시)
