@@ -94,7 +94,16 @@ const BASE_PLAYER = {
   maxHp: 100,
 };
 
+const STAGE_NAMES = ['STAGE 1', 'STAGE 2', 'STAGE 3'];
+
 let savedData = storage ? storage.getSaveData() : { resources: { fragments: 0, cores: 0 } };
+savedData = {
+  ...savedData,
+  clearData: {
+    NORMAL: savedData.clearData?.NORMAL ?? [],
+    HARD: savedData.clearData?.HARD ?? [],
+  },
+};
 let metaUpgrades = storage ? storage.getMetaUpgrades() : {};
 let playerState = { ...BASE_PLAYER };
 let gameInfo = {
@@ -104,6 +113,10 @@ let gameInfo = {
   rerolls: 0,
   level: 1,
 };
+let isGodMode = false;
+let isTestStage = false;
+let devTapCount = 0;
+let devTapTimer = null;
 
 const startChoiceTemplates = [
   '에너지 실드',
@@ -145,11 +158,21 @@ function persistSaveData() {
   storage.setSaveData(savedData);
 }
 
+function saveSavedData(nextData) {
+  savedData = nextData;
+  persistSaveData();
+}
+
 function updateLobbyResources() {
   const fragmentsEl = document.getElementById('lobby-fragments');
   const coresEl = document.getElementById('lobby-cores');
   if (fragmentsEl) fragmentsEl.textContent = savedData.resources.fragments;
   if (coresEl) coresEl.textContent = savedData.resources.cores;
+}
+
+function updateLobbyUI() {
+  updateLobbyResources();
+  updateRunStats();
 }
 
 function updateRunStats() {
@@ -355,6 +378,63 @@ function startRun() {
   openSelectionOverlay();
 }
 
+function setupDevPanelToggle() {
+  const versionEl = document.getElementById('version');
+  const devPanel = document.getElementById('dev-panel');
+  if (!versionEl || !devPanel) return;
+
+  versionEl.addEventListener('click', () => {
+    devTapCount += 1;
+    if (devTapTimer) {
+      window.clearTimeout(devTapTimer);
+    }
+    devTapTimer = window.setTimeout(() => {
+      devTapCount = 0;
+    }, 1500);
+
+    if (devTapCount >= 5) {
+      devTapCount = 0;
+      devPanel.classList.remove('hidden');
+    }
+  });
+}
+
+function activateGodMode() {
+  const stageCount = STAGE_NAMES.length;
+  const stageIds = Array.from({ length: stageCount }, (_, index) => index + 1);
+  savedData = {
+    ...savedData,
+    clearData: {
+      NORMAL: stageIds,
+      HARD: stageIds,
+    },
+    resources: {
+      ...savedData.resources,
+      fragments: (savedData.resources.fragments ?? 0) + 100000,
+      cores: (savedData.resources.cores ?? 0) + 100000,
+    },
+  };
+  saveSavedData(savedData);
+  updateLobbyUI();
+  isGodMode = true;
+  isTestStage = false;
+  alert('GOD MODE ENABLED\nALL STAGES UNLOCKED\n+100000 FRAGMENTS / +100000 CORES');
+}
+
+function openTestConfig() {
+  const overlay = document.getElementById('test-config-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('hidden');
+  isTestStage = true;
+}
+
+function closeTestConfig() {
+  const overlay = document.getElementById('test-config-overlay');
+  if (!overlay) return;
+  overlay.classList.add('hidden');
+  isTestStage = false;
+}
+
 function init() {
   const versionEl = document.getElementById('version');
   if (versionEl && window.GDC_VERSION) {
@@ -414,8 +494,36 @@ function init() {
     });
   }
 
-  updateLobbyResources();
-  updateRunStats();
+  setupDevPanelToggle();
+
+  const devGodBtn = document.getElementById('dev-god-btn');
+  const devTestBtn = document.getElementById('dev-test-btn');
+  if (devGodBtn) {
+    devGodBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      activateGodMode();
+    });
+  }
+  if (devTestBtn) {
+    devTestBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openTestConfig();
+    });
+  }
+
+  const testConfigClose = document.getElementById('test-config-close');
+  if (testConfigClose) {
+    testConfigClose.addEventListener('click', closeTestConfig);
+  }
+
+  const testConfigBackdrop = document.getElementById('test-config-backdrop');
+  if (testConfigBackdrop) {
+    testConfigBackdrop.addEventListener('click', closeTestConfig);
+  }
+
+  updateLobbyUI();
 
   resize();
   window.addEventListener('resize', resize);

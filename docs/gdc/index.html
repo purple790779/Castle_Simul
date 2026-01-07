@@ -103,6 +103,39 @@
       line-height: 1.6;
     }
 
+    .dev-panel {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px dashed #3d455b;
+      background: rgba(26, 33, 51, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .dev-panel.hidden {
+      display: none;
+    }
+
+    .dev-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .dev-btn {
+      min-height: 48px;
+      border-radius: 14px;
+      border: 1px solid #3d455b;
+      background: #2c3346;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -314,7 +347,7 @@
 <body>
   <header class="topbar">
     <a class="hub" href="../">HUB</a>
-    <div class="version" id="version">v37.1.4</div>
+    <div class="version" id="version">v37.1.6</div>
   </header>
 
   <main class="content">
@@ -335,6 +368,14 @@
       <div class="run-stats" id="run-stats">
         런 준비 완료. 업그레이드 적용 상태를 여기에 표시합니다.
       </div>
+
+      <section class="dev-panel hidden" id="dev-panel" aria-label="Developer panel">
+        <strong>DEV PANEL</strong>
+        <div class="dev-actions">
+          <button class="dev-btn" id="dev-god-btn" type="button">GOD MODE</button>
+          <button class="dev-btn" id="dev-test-btn" type="button">TEST STAGE</button>
+        </div>
+      </section>
     </section>
   </main>
 
@@ -376,6 +417,22 @@
       <button id="rotate-continue" class="rotate-continue-btn" type="button" aria-label="Continue in landscape">
         계속 진행
       </button>
+    </div>
+  </div>
+
+  <div id="test-config-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="test-config-title">
+    <div class="modal-backdrop" id="test-config-backdrop" aria-hidden="true"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="test-config-title">TEST CONFIG</div>
+        <button id="test-config-close" class="close-btn" type="button" aria-label="Close test config">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-scroll">
+          <p>테스트 스테이지 설정 화면입니다.</p>
+          <p>테스트 모드에서 사용할 옵션을 선택하세요.</p>
+        </div>
+      </div>
     </div>
   </div>
 
