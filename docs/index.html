@@ -12,15 +12,20 @@
       <h1>성주 경영 시뮬레이션 (MVP)</h1>
       <p class="subtitle">식량/노동/건설/세금 + 사건 + 치안/정통성의 최소 구현</p>
     </div>
+    <div class="statusbar" id="statusBar"></div>
     <div class="topbar-right">
-      <div class="version">v0.1.1</div>
+      <div class="version">v0.1.3</div>
       <div class="controls">
-        <button id="btnTick" class="btn btn-primary">하루 진행</button>
-        <button id="btnAuto" class="btn btn-secondary">자동 진행: OFF</button>
-        <button id="btnSave" class="btn btn-secondary">저장</button>
-        <button id="btnLoad" class="btn btn-secondary">불러오기</button>
-        <button id="btnHelp" class="btn btn-secondary">도움말 ?</button>
-        <button id="btnReset" class="btn btn-secondary danger">초기화</button>
+        <div class="controls-row">
+          <button id="btnTick" class="btn btn-primary">하루 진행</button>
+          <button id="btnAuto" class="btn btn-secondary">자동 진행: OFF</button>
+        </div>
+        <div class="controls-row">
+          <button id="btnSave" class="btn btn-secondary">저장</button>
+          <button id="btnLoad" class="btn btn-secondary">불러오기</button>
+          <button id="btnHelp" class="btn btn-secondary">도움말 ?</button>
+          <button id="btnReset" class="btn btn-secondary danger btn-small">초기화</button>
+        </div>
       </div>
     </div>
   </header>
@@ -28,9 +33,14 @@
   <main class="layout">
     <section class="card span-7">
       <h2>현황</h2>
-      <div class="grid stats" id="stats"></div>
+      <div class="grid stats core" id="statsCore"></div>
       <div class="security-alert muted" id="securityAlert"></div>
       <div class="security-help muted small">치안은 경비 인력과 성벽으로 올릴 수 있습니다.</div>
+      <div class="next-action" id="nextAction"></div>
+      <details class="accordion" id="statsDetails">
+        <summary>상세 보기</summary>
+        <div class="grid stats" id="statsDetailsGrid"></div>
+      </details>
       <div class="hint" id="hints"></div>
     </section>
 

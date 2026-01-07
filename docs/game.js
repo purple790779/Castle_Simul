@@ -573,9 +573,12 @@ function build(buildingId) {
 }
 
 /** ---------- UI Rendering ---------- */
-const elStats = document.getElementById('stats');
+const elStatsCore = document.getElementById('statsCore');
+const elStatsDetails = document.getElementById('statsDetailsGrid');
 const elHints = document.getElementById('hints');
 const elSecurityAlert = document.getElementById('securityAlert');
+const elStatusBar = document.getElementById('statusBar');
+const elNextAction = document.getElementById('nextAction');
 const elJobs = document.getElementById('jobs');
 const elBuildings = document.getElementById('buildings');
 const elLog = document.getElementById('log');
@@ -623,6 +626,12 @@ function badge(text) {
   return span;
 }
 
+function badgeWithStatus(text, status) {
+  const span = badge(text);
+  if (status) span.classList.add(status);
+  return span;
+}
+
 function kv(key, value, sub=null) {
   const div = document.createElement('div');
   div.className = 'kv';
@@ -642,26 +651,64 @@ function kv(key, value, sub=null) {
   return div;
 }
 
+function renderStatusBar(foodDays) {
+  if (!elStatusBar) return;
+  elStatusBar.innerHTML = '';
+
+  const foodStatus = foodDays < 2 ? 'danger' : null;
+  const securityStatus = state.security < 40 ? 'warning' : null;
+  const happinessStatus = state.happiness < 40 ? 'warning' : null;
+  const legitimacyStatus = state.legitimacy < 40 ? 'warning' : null;
+
+  elStatusBar.appendChild(badgeWithStatus(`식량 ${fmt(foodDays)}일`, foodStatus));
+  elStatusBar.appendChild(badgeWithStatus(`치안 ${Math.floor(state.security)}`, securityStatus));
+  elStatusBar.appendChild(badgeWithStatus(`행복 ${Math.floor(state.happiness)}`, happinessStatus));
+  elStatusBar.appendChild(badgeWithStatus(`정통성 ${Math.floor(state.legitimacy)}`, legitimacyStatus));
+}
+
+function renderNextAction(foodDays) {
+  if (!elNextAction) return;
+  let text = '';
+  if (foodDays < 2) {
+    text = '식량 부족: 농부 배치를 늘리세요.';
+  } else if (state.security < 40) {
+    text = '치안 불안: 경비를 늘리거나 성벽을 건설하세요.';
+  } else if (state.happiness < 40) {
+    text = '행복 저하: 선술집/정책으로 개선하세요.';
+  } else if (state.legitimacy < 40) {
+    text = '정통성 저하: 구휼/선정으로 회복하세요.';
+  }
+
+  if (text) {
+    elNextAction.textContent = `다음 추천 행동: ${text}`;
+    elNextAction.classList.remove('muted');
+  } else {
+    elNextAction.textContent = '다음 추천 행동: 현재는 안정적입니다.';
+    elNextAction.classList.add('muted');
+  }
+}
+
 function renderStats() {
-  elStats.innerHTML = '';
+  elStatsCore.innerHTML = '';
+  elStatsDetails.innerHTML = '';
 
   const w = workforce();
   const jobsSum = Object.values(state.jobs).reduce((a,b)=>a+b,0);
   const idle = Math.max(0, w - jobsSum);
 
   const foodDays = state.population > 0 ? (state.food / (state.population * 1.05)) : 0;
+  renderStatusBar(foodDays);
 
-  elStats.appendChild(kv('Day / 계절', `Day ${state.day} · ${season().name}`, `30일마다 계절 변화`));
-  elStats.appendChild(kv('인구 / 수용', `${state.population} / ${state.housing}`, state.population > state.housing ? '과밀: 행복 감소' : ''));
-  elStats.appendChild(kv('노동력', `${w} (배치 ${jobsSum}, 유휴 ${idle})`, jobsSum > w ? '초과 배치: 자동으로 조정됨' : ''));
+  elStatsCore.appendChild(kv('식량', `${Math.floor(state.food)} / ${state.storageCap}`, `잔여 ${fmt(foodDays)}일`));
+  elStatsCore.appendChild(kv('노동력', `${w} (배치 ${jobsSum}, 유휴 ${idle})`, jobsSum > w ? '초과 배치: 자동으로 조정됨' : ''));
+  elStatsCore.appendChild(kv('치안', `${Math.floor(state.security)}/100`, state.security < 40 ? '약탈 위험 증가' : ''));
+  elStatsCore.appendChild(kv('금고', `${Math.floor(state.gold)}`, `주간 세금: Day ${state.day % 7 === 0 ? '오늘' : (7 - (state.day % 7)) + '일 후'}`));
 
-  elStats.appendChild(kv('식량', `${Math.floor(state.food)} / ${state.storageCap}`, `잔여 ${fmt(foodDays)}일`));
-  elStats.appendChild(kv('목재 / 돌', `${Math.floor(state.wood)} / ${Math.floor(state.stone)}`, '건설·방어 핵심 자원'));
-  elStats.appendChild(kv('금고', `${Math.floor(state.gold)}`, `주간 세금: Day ${state.day % 7 === 0 ? '오늘' : (7 - (state.day % 7)) + '일 후'}`));
-
-  elStats.appendChild(kv('행복', `${Math.floor(state.happiness)}/100`, state.happiness < 45 ? '불만 증가: 치안 하락/이벤트 가중' : ''));
-  elStats.appendChild(kv('치안', `${Math.floor(state.security)}/100`, state.security < 40 ? '약탈 위험 증가' : ''));
-  elStats.appendChild(kv('정통성', `${Math.floor(state.legitimacy)}/100`, state.legitimacy < 40 ? '세금 저항/동요 위험' : ''));
+  elStatsDetails.appendChild(kv('Day / 계절', `Day ${state.day} · ${season().name}`, `30일마다 계절 변화`));
+  elStatsDetails.appendChild(kv('인구 / 수용', `${state.population} / ${state.housing}`, state.population > state.housing ? '과밀: 행복 감소' : ''));
+  elStatsDetails.appendChild(kv('목재 / 돌', `${Math.floor(state.wood)} / ${Math.floor(state.stone)}`, '건설·방어 핵심 자원'));
+  elStatsDetails.appendChild(kv('행복', `${Math.floor(state.happiness)}/100`, state.happiness < 45 ? '불만 증가: 치안 하락/이벤트 가중' : ''));
+  elStatsDetails.appendChild(kv('정통성', `${Math.floor(state.legitimacy)}/100`, state.legitimacy < 40 ? '세금 저항/동요 위험' : ''));
 
   if (state.security < 25) {
     elSecurityAlert.textContent = '폭동 위험';
@@ -673,6 +720,8 @@ function renderStats() {
     elSecurityAlert.textContent = '';
     elSecurityAlert.className = 'security-alert muted';
   }
+
+  renderNextAction(foodDays);
 }
 
 function renderHints() {
